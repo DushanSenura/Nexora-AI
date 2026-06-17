@@ -7,9 +7,9 @@ import { query } from "../../database/pool.js";
 import { HttpError } from "../../utils/httpError.js";
 export const authRouter = Router();
 const authSchema = z.object({
-    name: z.string().min(2).optional(),
-    email: z.string().email(),
-    password: z.string().min(8),
+    name: z.string().trim().min(2, "Name must be at least 2 characters").optional(),
+    email: z.string().trim().email("Enter a valid email address").transform((email) => email.toLowerCase()),
+    password: z.string().min(8, "Password must be at least 8 characters"),
 });
 function signToken(user) {
     const options = {

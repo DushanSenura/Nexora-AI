@@ -83,4 +83,16 @@ export function RegisterPage() {
               required
               minLength={8}
             />
-            {error ? <p clas
+            {error ? <p className="text-sm text-destructive">{error}</p> : null}
+            <Button className="w-full" type="submit" disabled={isSubmitting}>
+              {isSubmitting ? "Creating account..." : "Create account"}
+            </Button>
+          </form>
+          <p className="mt-4 text-sm text-muted-foreground">
+            Already registered? <Link className="text-primary hover:underline" to="/login">Login</Link>
+          </p>
+        </CardContent>
+      </Card>
+    </section>
+  );
+}

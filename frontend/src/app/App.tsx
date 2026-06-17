@@ -60,4 +60,7 @@ export function App() {
         </Route>
       </Route>
 
-      <Route path="*" el
+      <Route path="*" element={<Navigate to="/" replace />} />
+    </Routes>
+  );
+}

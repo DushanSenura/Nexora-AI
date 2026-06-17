@@ -15,4 +15,14 @@ export function AuthLayout() {
             <Link to="/login" className="hover:text-foreground">Sign in</Link>
             <Link
               to="/register"
-              className="rounded-md
+              className="rounded-md bg-primary px-3 py-2 text-primary-foreground hover:bg-primary/90"
+            >
+              Create account
+            </Link>
+          </nav>
+        </div>
+      </header>
+      <Outlet />
+    </main>
+  );
+}
