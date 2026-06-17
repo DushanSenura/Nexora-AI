@@ -1,0 +1,18 @@
+[
+  {
+    "id": "23c49136-1f84-420f-bc5b-03c3ab17a16f",
+    "name": "Debug User",
+    "email": "debug-user-2@nexora.local",
+    "password_hash": "$2a$12$Q14iCzBd8vzpCKwCRLIdwuP6kOilRIjZm1GbwcCSxDmVXQJAifuj2",
+    "role": "user",
+    "created_at": "2026-06-17T14:57:05.624Z"
+  },
+  {
+    "id": "94c5cce2-8ac3-47bc-b50b-9ea3102d9e84",
+    "name": "Auth Test",
+    "email": "auth-test-1781708419683@nexora.local",
+    "password_hash": "$2a$12$wKu.MDkl3JmxWXPnBi8hhOsHqKEoQCN.xoizH1k9t/Ky6Dvj27xki",
+    "role": "user",
+    "created_at": "2026-06-17T15:00:20.374Z"
+  }
+]

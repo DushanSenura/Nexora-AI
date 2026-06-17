@@ -1,6 +1,7 @@
 import { Link, NavLink, Outlet } from "react-router-dom";
 import { BarChart3, Database, FileText, LogOut, MessageSquare, Users } from "lucide-react";
 import { BrandLogo } from "../BrandLogo";
+import { ThemeToggle } from "../ThemeToggle";
 import { Button } from "../ui/button";
 import { useAuth } from "../../features/auth/AuthProvider";
 import { cn } from "../../utils/cn";
@@ -26,6 +27,7 @@ export function AdminLayout() {
           </Link>
           <div className="flex items-center gap-2">
             <Link to="/dashboard" className="text-sm font-medium text-primary hover:underline">Workspace</Link>
+            <ThemeToggle />
             <Button variant="ghost" size="icon" aria-label="Sign out" onClick={logout}>
               <LogOut className="h-4 w-4" />
             </Button>

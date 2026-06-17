@@ -5,6 +5,7 @@ import { z } from "zod";
 import { env } from "../../config/env.js";
 import { query } from "../../database/pool.js";
 import { HttpError } from "../../utils/httpError.js";
+import { canUseDevAuthFallback, createDevUser, findDevUserByCredentials, toPublicUser, } from "./devAuthStore.js";
 export const authRouter = Router();
 const authSchema = z.object({
     name: z.string().trim().min(2, "Name must be at least 2 characters").optional(),
@@ -30,6 +31,20 @@ authRouter.post("/register", async (req, res, next) => {
             next(new HttpError(409, "An account with this email already exists"));
             return;
         }
+        if (canUseDevAuthFallback(error)) {
+            const input = authSchema.required({ name: true }).parse(req.body);
+            const user = await createDevUser(input);
+            if (!user) {
+                next(new HttpError(409, "An account with this email already exists"));
+                return;
+            }
+            res.status(201).json({
+                user: toPublicUser(user),
+                token: signToken({ id: user.id, email: user.email, role: user.role }),
+                mode: "development-fallback",
+            });
+            return;
+        }
         next(error);
     }
 });
@@ -47,6 +62,20 @@ authRouter.post("/login", async (req, res, next) => {
         });
     }
     catch (error) {
+        if (canUseDevAuthFallback(error)) {
+            const input = authSchema.omit({ name: true }).parse(req.body);
+            const user = await findDevUserByCredentials(input);
+            if (!user) {
+                next(new HttpError(401, "Invalid email or password"));
+                return;
+            }
+            res.json({
+                user: toPublicUser(user),
+                token: signToken({ id: user.id, email: user.email, role: user.role }),
+                mode: "development-fallback",
+            });
+            return;
+        }
         next(error);
     }
 });

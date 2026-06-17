@@ -20,7 +20,7 @@ export function BrandLogo({
 
   return (
     <span className={cn("flex min-w-0 items-center gap-2", className)}>
-      <span className="flex h-9 w-9 shrink-0 items-center justify-center overflow-hidden rounded-md bg-slate-950">
+      <span className="flex h-9 w-9 shrink-0 items-center justify-center overflow-hidden rounded-md">
         <img
           src={logo}
           alt={alt}
@@ -31,4 +31,3 @@ export function BrandLogo({
     </span>
   );
 }
-

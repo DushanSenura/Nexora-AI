@@ -4,6 +4,7 @@ import helmet from "helmet";
 import morgan from "morgan";
 import { env } from "./config/env.js";
 import { errorHandler } from "./middleware/errorHandler.js";
+import { notFoundHandler } from "./middleware/notFoundHandler.js";
 import { authRouter } from "./modules/auth/auth.routes.js";
 import { usersRouter } from "./modules/users/users.routes.js";
 import { chatsRouter } from "./modules/chats/chats.routes.js";
@@ -31,9 +32,9 @@ app.use("/api/documents", documentsRouter);
 app.use("/api/agents", agentsRouter);
 app.use("/api/analytics", analyticsRouter);
 
+app.use(notFoundHandler);
 app.use(errorHandler);
 
 app.listen(env.BACKEND_PORT, () => {
   console.log(`Backend API listening on port ${env.BACKEND_PORT}`);
 });
-

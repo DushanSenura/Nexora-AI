@@ -1,5 +1,6 @@
 import { Outlet, Link } from "react-router-dom";
 import { BrandLogo } from "../BrandLogo";
+import { ThemeToggle } from "../ThemeToggle";
 
 export function AuthLayout() {
   return (
@@ -13,6 +14,7 @@ export function AuthLayout() {
             <Link to="/pricing" className="hover:text-foreground">Pricing</Link>
             <Link to="/about" className="hover:text-foreground">About</Link>
             <Link to="/login" className="hover:text-foreground">Sign in</Link>
+            <ThemeToggle />
             <Link
               to="/register"
               className="rounded-md bg-primary px-3 py-2 text-primary-foreground hover:bg-primary/90"
