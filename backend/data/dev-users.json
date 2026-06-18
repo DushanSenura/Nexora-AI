@@ -54,5 +54,13 @@
     "password_hash": "$2a$12$KdCuFY0hVEJNIZYck1oYM.Bw8nMIKpm1k18LHNEogxSFH8Yfi36wO",
     "role": "user",
     "created_at": "2026-06-18T16:49:48.344Z"
+  },
+  {
+    "id": "5d3a6200-3ce5-4ab7-a37b-4520c8ac8ebf",
+    "name": "Doc Test",
+    "email": "doc-test-1781801801754@nexora.local",
+    "password_hash": "$2a$12$gRmTWphBc2oDpPWZSKXkTek995hrY8hImUXvdewEQzqPVuoG/iE/u",
+    "role": "user",
+    "created_at": "2026-06-18T16:56:42.383Z"
   }
 ]
