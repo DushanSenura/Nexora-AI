@@ -1,38 +1,302 @@
-import { useParams } from "react-router-dom";
-import { Send } from "lucide-react";
+import { type FormEvent, useMemo, useState } from "react";
+import { Link, useNavigate, useParams } from "react-router-dom";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { Edit3, Eraser, MessageSquarePlus, Send, Trash2, X } from "lucide-react";
 import { PageHeader } from "../../components/PageHeader";
 import { Button } from "../../components/ui/button";
 import { Card } from "../../components/ui/card";
 import { Input } from "../../components/ui/input";
+import { cn } from "../../utils/cn";
+import {
+  clearChatMessages,
+  createChat,
+  deleteChat,
+  listChats,
+  listMessages,
+  renameChat,
+  sendMessage,
+  type ChatRecord,
+  type MessageRecord,
+} from "../../features/chat/chatApi";
+
+function LoadingDots() {
+  return (
+    <div className="flex items-center gap-1 px-3 py-2">
+      {[0, 1, 2].map((index) => (
+        <span
+          key={index}
+          className="h-2 w-2 animate-bounce rounded-full bg-muted-foreground"
+          style={{ animationDelay: `${index * 120}ms` }}
+        />
+      ))}
+    </div>
+  );
+}
+
+function MessageBubble({ message }: { message: MessageRecord }) {
+  const isUser = message.role === "user";
+
+  return (
+    <div className={cn("flex", isUser ? "justify-end" : "justify-start")}>
+      <div
+        className={cn(
+          "max-w-[min(42rem,85%)] rounded-lg px-4 py-3 text-sm leading-6",
+          isUser ? "bg-primary text-primary-foreground" : "bg-muted text-foreground",
+        )}
+      >
+        {message.content}
+      </div>
+    </div>
+  );
+}
 
 export function ChatPage() {
   const { chatId } = useParams();
+  const navigate = useNavigate();
+  const queryClient = useQueryClient();
+  const [message, setMessage] = useState("");
+  const [error, setError] = useState("");
+  const [editingChatId, setEditingChatId] = useState<string | null>(null);
+  const [editingTitle, setEditingTitle] = useState("");
+
+  const chatsQuery = useQuery({
+    queryKey: ["chats"],
+    queryFn: listChats,
+  });
+
+  const messagesQuery = useQuery({
+    queryKey: ["messages", chatId],
+    queryFn: () => listMessages(chatId!),
+    enabled: Boolean(chatId),
+  });
+
+  const createChatMutation = useMutation({
+    mutationFn: createChat,
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: ["chats"] });
+    },
+  });
+
+  const sendMessageMutation = useMutation({
+    mutationFn: sendMessage,
+    onSuccess: async (_data, variables) => {
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: ["chats"] }),
+        queryClient.invalidateQueries({ queryKey: ["messages", variables.chatId] }),
+      ]);
+    },
+  });
+
+  const renameChatMutation = useMutation({
+    mutationFn: renameChat,
+    onSuccess: async () => {
+      setEditingChatId(null);
+      setEditingTitle("");
+      await queryClient.invalidateQueries({ queryKey: ["chats"] });
+    },
+  });
+
+  const deleteChatMutation = useMutation({
+    mutationFn: deleteChat,
+    onSuccess: async (_data, deletedChatId) => {
+      await queryClient.invalidateQueries({ queryKey: ["chats"] });
+      queryClient.removeQueries({ queryKey: ["messages", deletedChatId] });
+      if (deletedChatId === chatId) {
+        navigate("/chat", { replace: true });
+      }
+    },
+  });
+
+  const clearChatMutation = useMutation({
+    mutationFn: clearChatMessages,
+    onSuccess: async (_data, clearedChatId) => {
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: ["chats"] }),
+        queryClient.invalidateQueries({ queryKey: ["messages", clearedChatId] }),
+      ]);
+    },
+  });
+
+  const messages = useMemo(() => messagesQuery.data ?? [], [messagesQuery.data]);
+  const isSending = createChatMutation.isPending || sendMessageMutation.isPending;
+
+  async function handleSubmit(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    const content = message.trim();
+    if (!content || isSending) {
+      return;
+    }
+
+    setError("");
+
+    try {
+      let activeChatId = chatId;
+      if (!activeChatId) {
+        const chat = await createChatMutation.mutateAsync("New chat");
+        activeChatId = chat.id;
+        navigate(`/chat/${chat.id}`, { replace: true });
+      }
+
+      setMessage("");
+      await sendMessageMutation.mutateAsync({ chatId: activeChatId, content });
+    } catch {
+      setMessage(content);
+      setError("Unable to send message. Check that the backend and AI service are running.");
+    }
+  }
+
+  async function handleRenameSubmit(event: FormEvent<HTMLFormElement>, chat: ChatRecord) {
+    event.preventDefault();
+    const title = editingTitle.trim();
+    if (!title || renameChatMutation.isPending) {
+      return;
+    }
+
+    await renameChatMutation.mutateAsync({ chatId: chat.id, title });
+  }
+
+  async function handleDelete(chat: ChatRecord) {
+    const shouldDelete = window.confirm(`Delete "${chat.title}"?`);
+    if (!shouldDelete) {
+      return;
+    }
+
+    await deleteChatMutation.mutateAsync(chat.id);
+  }
+
+  async function handleClearCurrentChat() {
+    if (!chatId || clearChatMutation.isPending) {
+      return;
+    }
+
+    await clearChatMutation.mutateAsync(chatId);
+  }
 
   return (
     <>
       <PageHeader title={chatId ? "Chat thread" : "New chat"} description="Ask questions, use local models, and keep the conversation history." />
       <div className="grid min-h-[calc(100vh-13rem)] gap-4 lg:grid-cols-[280px_1fr]">
         <Card className="p-4">
-          <h2 className="text-sm font-semibold">Recent chats</h2>
-          <div className="mt-3 space-y-2 text-sm text-muted-foreground">
-            <div>Research notes</div>
-            <div>API design review</div>
-            <div>Study plan draft</div>
+          <div className="flex items-center justify-between gap-3">
+            <h2 className="text-sm font-semibold">Recent chats</h2>
+            <Button variant="outline" size="sm" onClick={() => navigate("/chat")}>
+              <MessageSquarePlus className="h-4 w-4" />
+              New
+            </Button>
+          </div>
+          <div className="mt-3 space-y-1 text-sm">
+            {chatsQuery.isLoading ? (
+              <div className="text-muted-foreground">Loading chats...</div>
+            ) : null}
+            {(chatsQuery.data ?? []).map((chat) => (
+              <div
+                key={chat.id}
+                className={cn(
+                  "group flex min-h-10 items-center gap-1 rounded-md px-2 text-muted-foreground hover:bg-muted hover:text-foreground",
+                  chat.id === chatId && "bg-muted text-foreground",
+                )}
+              >
+                {editingChatId === chat.id ? (
+                  <form className="flex min-w-0 flex-1 items-center gap-1" onSubmit={(event) => handleRenameSubmit(event, chat)}>
+                    <Input
+                      className="h-8"
+                      value={editingTitle}
+                      onChange={(event) => setEditingTitle(event.target.value)}
+                      autoFocus
+                    />
+                    <Button type="button" variant="ghost" size="icon" aria-label="Cancel rename" onClick={() => setEditingChatId(null)}>
+                      <X className="h-4 w-4" />
+                    </Button>
+                  </form>
+                ) : (
+                  <>
+                    <Link to={`/chat/${chat.id}`} className="min-w-0 flex-1 truncate px-1 py-2">
+                      {chat.title}
+                    </Link>
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="icon"
+                      className="h-8 w-8 opacity-100 sm:opacity-0 sm:group-hover:opacity-100"
+                      aria-label="Rename chat"
+                      onClick={() => {
+                        setEditingChatId(chat.id);
+                        setEditingTitle(chat.title);
+                      }}
+                    >
+                      <Edit3 className="h-4 w-4" />
+                    </Button>
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="icon"
+                      className="h-8 w-8 opacity-100 sm:opacity-0 sm:group-hover:opacity-100"
+                      aria-label="Delete chat"
+                      onClick={() => handleDelete(chat)}
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
+                  </>
+                )}
+              </div>
+            ))}
+            {!chatsQuery.isLoading && !chatsQuery.data?.length ? (
+              <div className="text-muted-foreground">No chats yet.</div>
+            ) : null}
           </div>
         </Card>
-        <Card className="flex flex-col">
-          <div className="flex-1 space-y-4 p-4">
-            <div className="max-w-xl rounded-md bg-muted p-3 text-sm">How can I help with your workspace today?</div>
+        <Card className="flex min-h-[34rem] flex-col overflow-hidden">
+          <div className="flex items-center justify-between gap-3 border-b px-4 py-3">
+            <div className="min-w-0">
+              <h2 className="truncate text-sm font-semibold">
+                {chatsQuery.data?.find((chat) => chat.id === chatId)?.title ?? "New chat"}
+              </h2>
+            </div>
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              disabled={!chatId || clearChatMutation.isPending}
+              onClick={handleClearCurrentChat}
+            >
+              <Eraser className="h-4 w-4" />
+              Clear
+            </Button>
           </div>
-          <form className="flex gap-2 border-t p-4">
-            <Input placeholder="Message Nexora AI" />
-            <Button size="icon" aria-label="Send message">
+          <div className="flex-1 space-y-4 overflow-y-auto p-4">
+            {!chatId ? (
+              <div className="rounded-lg border border-dashed p-6 text-center text-sm text-muted-foreground">
+                Start a new chat by sending a message.
+              </div>
+            ) : null}
+            {messagesQuery.isLoading ? <div className="text-sm text-muted-foreground">Loading messages...</div> : null}
+            {messages.map((item) => (
+              <MessageBubble key={item.id} message={item} />
+            ))}
+            {isSending ? (
+              <div className="flex justify-start">
+                <div className="rounded-lg bg-muted">
+                  <LoadingDots />
+                </div>
+              </div>
+            ) : null}
+          </div>
+          <form className="border-t p-4" onSubmit={handleSubmit}>
+            {error ? <p className="mb-3 text-sm text-destructive">{error}</p> : null}
+            <div className="flex gap-2">
+            <Input
+              placeholder="Message Nexora AI"
+              value={message}
+              onChange={(event) => setMessage(event.target.value)}
+              disabled={isSending}
+            />
+            <Button size="icon" aria-label="Send message" disabled={isSending || !message.trim()}>
               <Send className="h-4 w-4" />
             </Button>
+            </div>
           </form>
         </Card>
       </div>
     </>
   );
 }
-

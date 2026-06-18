@@ -24,7 +24,7 @@ async def health() -> dict[str, str]:
 
 
 app.include_router(chat_router, prefix="/api/chat", tags=["chat"])
+app.include_router(chat_router, prefix="/ai/chat", tags=["chat"])
 app.include_router(rag_router, prefix="/api/rag", tags=["rag"])
 app.include_router(search_router, prefix="/api/search", tags=["search"])
 app.include_router(agents_router, prefix="/api/agents", tags=["agents"])
-

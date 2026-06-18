@@ -1,0 +1,52 @@
+{
+  "chats": [
+    {
+      "id": "e1cbb409-a004-4db2-80ff-0ce64492c8aa",
+      "user_id": "c1170e67-78a7-41fc-a9d5-58fb58bed6de",
+      "title": "Hello Nexora, reply briefly.",
+      "created_at": "2026-06-18T16:00:34.169Z",
+      "updated_at": "2026-06-18T16:00:36.734Z"
+    },
+    {
+      "id": "57b95eec-4d52-40d3-a166-0e263290a81f",
+      "user_id": "4f6aff7f-1c2f-4e35-b050-7fc24bfc96cf",
+      "title": "Ollama test",
+      "created_at": "2026-06-18T16:04:19.298Z",
+      "updated_at": "2026-06-18T16:04:20.356Z"
+    }
+  ],
+  "messages": [
+    {
+      "id": "f816ab15-4336-4a2f-8159-e977887c2e2d",
+      "chat_id": "e1cbb409-a004-4db2-80ff-0ce64492c8aa",
+      "role": "user",
+      "content": "Hello Nexora, reply briefly.",
+      "model": "llama3.1",
+      "created_at": "2026-06-18T16:00:36.733Z"
+    },
+    {
+      "id": "8289b9af-d201-482e-8f9d-f849a0c29a9f",
+      "chat_id": "e1cbb409-a004-4db2-80ff-0ce64492c8aa",
+      "role": "assistant",
+      "content": "Ollama is not reachable yet. Start Ollama locally or update OLLAMA_BASE_URL, then retry this prompt.",
+      "model": "llama3.1",
+      "created_at": "2026-06-18T16:00:36.734Z"
+    },
+    {
+      "id": "c69c4501-169c-45e9-9ff8-197e65c30839",
+      "chat_id": "57b95eec-4d52-40d3-a166-0e263290a81f",
+      "role": "user",
+      "content": "Reply with exactly: Ollama is working",
+      "model": "llama3.2",
+      "created_at": "2026-06-18T16:04:20.355Z"
+    },
+    {
+      "id": "6617cd72-fffc-4cee-a593-73b422c7b929",
+      "chat_id": "57b95eec-4d52-40d3-a166-0e263290a81f",
+      "role": "assistant",
+      "content": "Ollama is working",
+      "model": "llama3.2",
+      "created_at": "2026-06-18T16:04:20.356Z"
+    }
+  ]
+}

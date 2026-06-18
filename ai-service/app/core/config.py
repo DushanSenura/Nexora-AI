@@ -6,9 +6,8 @@ class Settings(BaseSettings):
 
     frontend_url: str = "http://localhost:5173"
     ollama_base_url: str = "http://localhost:11434"
-    ollama_model: str = "llama3.1"
+    ollama_model: str = "llama3.2"
     qdrant_url: str = "http://localhost:6333"
 
 
 settings = Settings()
-
