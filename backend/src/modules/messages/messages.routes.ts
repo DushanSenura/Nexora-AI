@@ -15,6 +15,7 @@ const messageSchema = z.object({
   chatId: z.string().uuid(),
   content: z.string().min(1),
   model: z.string().default("llama3.2"),
+  searchMode: z.boolean().default(false),
 });
 
 function generateChatTitle(content: string) {
@@ -68,14 +69,22 @@ messagesRouter.post("/", async (req, res, next) => {
       [input.chatId, input.content, input.model],
     );
 
-    const aiResponse = await axios.post(`${env.AI_SERVICE_URL}/ai/chat`, {
-      message: input.content,
-      model: input.model,
-    });
+    const aiResponse = input.searchMode
+      ? await axios.post(`${env.AI_SERVICE_URL}/ai/search/web`, {
+          query: input.content,
+          model: input.model,
+          limit: 5,
+        })
+      : await axios.post(`${env.AI_SERVICE_URL}/ai/chat`, {
+          message: input.content,
+          model: input.model,
+        });
+    const assistantContent = input.searchMode ? aiResponse.data.answer : aiResponse.data.response;
+    const sources = input.searchMode ? aiResponse.data.sources ?? [] : [];
 
     const assistantSaved = await query(
-      "insert into messages (chat_id, role, content, model) values ($1, 'assistant', $2, $3) returning *",
-      [input.chatId, aiResponse.data.response, input.model],
+      "insert into messages (chat_id, role, content, model, sources) values ($1, 'assistant', $2, $3, $4::jsonb) returning *",
+      [input.chatId, assistantContent, input.model, JSON.stringify(sources)],
     );
     await query("update chats set title = case when title = 'New chat' then $1 else title end, updated_at = now() where id = $2", [
       generateChatTitle(input.content),
@@ -92,16 +101,25 @@ messagesRouter.post("/", async (req, res, next) => {
     if (canUseDevAuthFallback(error)) {
       const input = messageSchema.parse(req.body);
       try {
-        const aiResponse = await axios.post(`${env.AI_SERVICE_URL}/ai/chat`, {
-          message: input.content,
-          model: input.model,
-        });
+        const aiResponse = input.searchMode
+          ? await axios.post(`${env.AI_SERVICE_URL}/ai/search/web`, {
+              query: input.content,
+              model: input.model,
+              limit: 5,
+            })
+          : await axios.post(`${env.AI_SERVICE_URL}/ai/chat`, {
+              message: input.content,
+              model: input.model,
+            });
+        const assistantContent = input.searchMode ? aiResponse.data.answer : aiResponse.data.response;
+        const sources = input.searchMode ? aiResponse.data.sources ?? [] : [];
         const saved = await appendDevMessagePair({
           userId: req.user!.id,
           chatId: input.chatId,
           userContent: input.content,
-          assistantContent: aiResponse.data.response,
+          assistantContent,
           model: input.model,
+          sources,
         });
 
         if (!saved) {

@@ -16,6 +16,7 @@ export type DevMessage = {
   role: "user" | "assistant" | "system";
   content: string;
   model?: string;
+  sources?: Array<{ title: string; url: string; snippet?: string }>;
   created_at: string;
 };
 
@@ -138,6 +139,7 @@ export async function appendDevMessagePair(input: {
   userContent: string;
   assistantContent: string;
   model: string;
+  sources?: Array<{ title: string; url: string; snippet?: string }>;
 }) {
   const store = await readStore();
   const chat = store.chats.find((candidate) => candidate.user_id === input.userId && candidate.id === input.chatId);
@@ -160,6 +162,7 @@ export async function appendDevMessagePair(input: {
     role: "assistant",
     content: input.assistantContent,
     model: input.model,
+    sources: input.sources ?? [],
     created_at: new Date(Date.now() + 1).toISOString(),
   };
 

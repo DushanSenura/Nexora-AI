@@ -14,6 +14,7 @@ export type MessageRecord = {
   role: "user" | "assistant" | "system";
   content: string;
   model?: string;
+  sources?: Array<{ title: string; url: string; snippet?: string }>;
   created_at: string;
 };
 
@@ -51,11 +52,12 @@ export async function listMessages(chatId: string) {
   return response.data;
 }
 
-export async function sendMessage(input: { chatId: string; content: string; model?: string }) {
+export async function sendMessage(input: { chatId: string; content: string; model?: string; searchMode?: boolean }) {
   const response = await api.post<SendMessageResponse>("/messages", {
     chatId: input.chatId,
     content: input.content,
     model: input.model ?? "llama3.2",
+    searchMode: input.searchMode ?? false,
   });
   return response.data;
 }

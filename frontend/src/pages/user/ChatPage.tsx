@@ -1,7 +1,7 @@
 import { type FormEvent, useMemo, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Edit3, Eraser, MessageSquarePlus, Send, Trash2, X } from "lucide-react";
+import { Edit3, Eraser, Globe2, MessageSquarePlus, Send, Trash2, X } from "lucide-react";
 import { PageHeader } from "../../components/PageHeader";
 import { Button } from "../../components/ui/button";
 import { Card } from "../../components/ui/card";
@@ -35,9 +35,10 @@ function LoadingDots() {
 
 function MessageBubble({ message }: { message: MessageRecord }) {
   const isUser = message.role === "user";
+  const sources = message.sources ?? [];
 
   return (
-    <div className={cn("flex", isUser ? "justify-end" : "justify-start")}>
+    <div className={cn("flex flex-col gap-2", isUser ? "items-end" : "items-start")}>
       <div
         className={cn(
           "max-w-[min(42rem,85%)] rounded-lg px-4 py-3 text-sm leading-6",
@@ -46,6 +47,29 @@ function MessageBubble({ message }: { message: MessageRecord }) {
       >
         {message.content}
       </div>
+      {!isUser && sources.length ? (
+        <div className="max-w-[min(42rem,85%)] space-y-2 rounded-lg border bg-card p-3">
+          <div className="flex items-center gap-2 text-xs font-medium text-muted-foreground">
+            <Globe2 className="h-3.5 w-3.5" />
+            Sources
+          </div>
+          <div className="space-y-2">
+            {sources.map((source) => (
+              <a
+                key={source.url}
+                href={source.url}
+                target="_blank"
+                rel="noreferrer"
+                className="block rounded-md p-2 text-xs hover:bg-muted"
+              >
+                <div className="font-medium text-foreground">{source.title}</div>
+                {source.snippet ? <div className="mt-1 line-clamp-2 text-muted-foreground">{source.snippet}</div> : null}
+                <div className="mt-1 truncate text-primary">{source.url}</div>
+              </a>
+            ))}
+          </div>
+        </div>
+      ) : null}
     </div>
   );
 }
@@ -56,6 +80,7 @@ export function ChatPage() {
   const queryClient = useQueryClient();
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
+  const [searchMode, setSearchMode] = useState(false);
   const [editingChatId, setEditingChatId] = useState<string | null>(null);
   const [editingTitle, setEditingTitle] = useState("");
 
@@ -138,7 +163,7 @@ export function ChatPage() {
       }
 
       setMessage("");
-      await sendMessageMutation.mutateAsync({ chatId: activeChatId, content });
+      await sendMessageMutation.mutateAsync({ chatId: activeChatId, content, searchMode });
     } catch {
       setMessage(content);
       setError("Unable to send message. Check that the backend and AI service are running.");
@@ -276,6 +301,7 @@ export function ChatPage() {
             {isSending ? (
               <div className="flex justify-start">
                 <div className="rounded-lg bg-muted">
+                  {searchMode ? <div className="px-3 pt-2 text-xs text-muted-foreground">Searching the web...</div> : null}
                   <LoadingDots />
                 </div>
               </div>
@@ -283,16 +309,28 @@ export function ChatPage() {
           </div>
           <form className="border-t p-4" onSubmit={handleSubmit}>
             {error ? <p className="mb-3 text-sm text-destructive">{error}</p> : null}
+            <div className="mb-3 flex items-center justify-between gap-3">
+              <label className="flex items-center gap-2 text-sm text-muted-foreground">
+                <input
+                  type="checkbox"
+                  checked={searchMode}
+                  onChange={(event) => setSearchMode(event.target.checked)}
+                  className="h-4 w-4 accent-primary"
+                />
+                Search web
+              </label>
+              {searchMode ? <span className="text-xs text-muted-foreground">Answers include sources</span> : null}
+            </div>
             <div className="flex gap-2">
-            <Input
-              placeholder="Message Nexora AI"
-              value={message}
-              onChange={(event) => setMessage(event.target.value)}
-              disabled={isSending}
-            />
-            <Button size="icon" aria-label="Send message" disabled={isSending || !message.trim()}>
-              <Send className="h-4 w-4" />
-            </Button>
+              <Input
+                placeholder={searchMode ? "Ask a current-events question" : "Message Nexora AI"}
+                value={message}
+                onChange={(event) => setMessage(event.target.value)}
+                disabled={isSending}
+              />
+              <Button size="icon" aria-label="Send message" disabled={isSending || !message.trim()}>
+                <Send className="h-4 w-4" />
+              </Button>
             </div>
           </form>
         </Card>

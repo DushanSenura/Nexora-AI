@@ -114,6 +114,7 @@ export async function appendDevMessagePair(input) {
         role: "assistant",
         content: input.assistantContent,
         model: input.model,
+        sources: input.sources ?? [],
         created_at: new Date(Date.now() + 1).toISOString(),
     };
     chat.updated_at = assistantMessage.created_at;

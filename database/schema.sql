@@ -39,6 +39,7 @@ create table if not exists messages (
   role message_role not null,
   content text not null,
   model text,
+  sources jsonb not null default '[]'::jsonb,
   created_at timestamptz not null default now()
 );
 
@@ -88,4 +89,3 @@ drop trigger if exists chats_touch_updated_at on chats;
 create trigger chats_touch_updated_at
 before update on chats
 for each row execute function touch_updated_at();
-
