@@ -51,10 +51,13 @@ authRouter.post("/register", async (req, res, next) => {
 authRouter.post("/login", async (req, res, next) => {
     try {
         const input = authSchema.omit({ name: true }).parse(req.body);
-        const result = await query("select id, name, email, password_hash, role, created_at from users where email = $1", [input.email]);
+        const result = await query("select id, name, email, password_hash, role, disabled_at, created_at from users where email = $1", [input.email]);
         const user = result.rows[0];
         if (!user || !(await bcrypt.compare(input.password, user.password_hash))) {
             throw new HttpError(401, "Invalid email or password");
+        }
+        if (user.disabled_at) {
+            throw new HttpError(403, "This account has been disabled");
         }
         res.json({
             user: { id: user.id, name: user.name, email: user.email, role: user.role, created_at: user.created_at },

@@ -5,6 +5,8 @@ import {
   clearAuth,
   getStoredToken,
   getStoredUser,
+  normalizeUser,
+  storeUser,
   storeAuth,
   type AuthResponse,
 } from "./authStorage";
@@ -25,6 +27,7 @@ type AuthContextValue = {
   login: (input: LoginInput) => Promise<void>;
   register: (input: RegisterInput) => Promise<void>;
   logout: () => void;
+  setCurrentUser: (user: AuthResponse["user"]) => void;
 };
 
 const AuthContext = createContext<AuthContextValue | undefined>(undefined);
@@ -55,6 +58,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         setUser(null);
         setToken(null);
       },
+      setCurrentUser(nextUser) {
+        const normalizedUser = normalizeUser(nextUser);
+        storeUser(normalizedUser);
+        setUser(normalizedUser);
+      },
     }),
     [token, user],
   );
@@ -69,4 +77,3 @@ export function useAuth() {
   }
   return context;
 }
-

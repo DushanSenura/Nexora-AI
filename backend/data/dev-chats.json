@@ -22,11 +22,11 @@
       "updated_at": "2026-06-18T16:49:52.415Z"
     },
     {
-      "id": "cdf84ee2-3590-421e-9641-e45b5e85bd57",
-      "user_id": "a59b02db-2088-4a45-9ee3-33fef4cf8639",
-      "title": "who is the president of sri lanka",
-      "created_at": "2026-06-18T16:50:53.205Z",
-      "updated_at": "2026-06-18T16:51:50.218Z"
+      "id": "12405d61-6946-461a-9f87-702f77306eb5",
+      "user_id": "e878b47e-f3cd-457e-af7a-c0dc92f88c8b",
+      "title": "Test chat",
+      "created_at": "2026-06-19T16:29:47.388Z",
+      "updated_at": "2026-06-19T16:29:48.564Z"
     }
   ],
   "messages": [
@@ -106,90 +106,21 @@
       "created_at": "2026-06-18T16:49:52.415Z"
     },
     {
-      "id": "fa98dabe-918b-4840-b403-36b1dfb6af1b",
-      "chat_id": "cdf84ee2-3590-421e-9641-e45b5e85bd57",
+      "id": "bbda4d08-52be-4752-a059-74825b4183c8",
+      "chat_id": "12405d61-6946-461a-9f87-702f77306eb5",
       "role": "user",
-      "content": "who is the president of sri lanka",
+      "content": "Reply exactly: chat api ok",
       "model": "llama3.2",
-      "created_at": "2026-06-18T16:50:56.712Z"
+      "created_at": "2026-06-19T16:29:48.563Z"
     },
     {
-      "id": "6f828587-199d-4081-a40c-c50e08db0696",
-      "chat_id": "cdf84ee2-3590-421e-9641-e45b5e85bd57",
+      "id": "92455d7b-349d-4d74-8e2c-921b7f6d1479",
+      "chat_id": "12405d61-6946-461a-9f87-702f77306eb5",
       "role": "assistant",
-      "content": "The current president of Sri Lanka is Anura Kumara Dissanayake, who has been in office since 2024.",
+      "content": "Chat API OK",
       "model": "llama3.2",
-      "sources": [
-        {
-          "title": "President of Sri Lanka - Wikipedia",
-          "url": "https://en.wikipedia.org/wiki/President_of_Sri_Lanka",
-          "snippet": "The president of Sri Lanka (Sinhala: ශ්‍රී ලංකා ජනාධිපති Ś r ī Laṅk ā Janādhipati; Tamil: இலங்கை ஜனாதிபதி Ilaṇkai janātipati) is the head of state and head of government of the Democratic Socialist Republic of Sri Lanka . The president is the chief executive of the union government and the commander-in-chief of the Sri Lanka ..."
-        },
-        {
-          "title": "President of Sri Lanka",
-          "url": "https://www.president.gov.lk/",
-          "snippet": "Official website of the President of Sri Lanka . News, policies, media, and contact information."
-        },
-        {
-          "title": "Anura Kumara Dissanayake - Wikipedia",
-          "url": "https://en.wikipedia.org/wiki/Anura_Kumara_Dissanayake",
-          "snippet": "Anura Kumara Dissanayake[b] (born 24 November 1968), commonly referred to by his initials AKD, is a Sri Lankan politician who has served as the tenth president of Sri Lanka since 2024. [2][3][4][5] Dissanayake is the first Sri Lankan president to be elected in a second round of vote counting, [6][7] and the first not to be a member of the traditional political parties of Sri Lanka . [8] He is ..."
-        },
-        {
-          "title": "President | Presidential Secretariat",
-          "url": "https://www.presidentsoffice.gov.lk/president/",
-          "snippet": "Information about the President of Sri Lanka , including current and former Presidents ."
-        },
-        {
-          "title": "Anura Kumara Dissanayake | Biography, Career, & Facts | Britannica",
-          "url": "https://www.britannica.com/biography/Anura-Kumara-Dissanayake",
-          "snippet": "Anura Kumara Dissanayake is the ninth executive president of Sri Lanka (2024- ) and leader of the leftist Janatha Vimukthi Peramuna (JVP) party."
-        }
-      ],
-      "created_at": "2026-06-18T16:50:56.713Z"
-    },
-    {
-      "id": "fb78d84b-113e-4c68-add7-8aedea556a3c",
-      "chat_id": "cdf84ee2-3590-421e-9641-e45b5e85bd57",
-      "role": "user",
-      "content": "what are the current fuel prices in sri lanka",
-      "model": "llama3.2",
-      "created_at": "2026-06-18T16:51:50.217Z"
-    },
-    {
-      "id": "b4db992d-83fd-4eaf-b626-473e9cf5a8d0",
-      "chat_id": "cdf84ee2-3590-421e-9641-e45b5e85bd57",
-      "role": "assistant",
-      "content": "I couldn't find the current fuel prices in Sri Lanka from the search results provided. The most recent information I found is for March 2026, and I don't have real-time access to the current prices.\n\nHowever, some websites like Ceylon Petroleum Corporation, Welandapola, Lankacalculator.com, FuelPrice.lk, and Fuelpass.lk provide updated fuel prices in Sri Lanka. You can visit these websites for the most recent information on petrol, diesel, and kerosene rates.",
-      "model": "llama3.2",
-      "sources": [
-        {
-          "title": "MARKETING & SALES - Ceylon Petroleum Corporation",
-          "url": "https://ceypetco.gov.lk/marketing-sales/",
-          "snippet": "CEYPETCO provides all the fuel needs in Sri Lanka through about 850 dealers. The outstation spot prices will incorporate the same transport differential as before."
-        },
-        {
-          "title": "Fuel Prices Sri Lanka | Current Rates per Liter",
-          "url": "https://welandapola.com/fuel",
-          "snippet": "Best website in Sri Lanka for updated fuel prices . Current fuel prices with rates for petrol, diesel, and kerosene. Updated daily with market rates for all fuel types."
-        },
-        {
-          "title": "Fuel Price Chart Sri Lanka | Petrol Prices Today, History, Graph",
-          "url": "https://www.lankacalculator.com/rates/fuel-prices",
-          "snippet": "Track current fuel prices in Sri Lanka with a live petrol and diesel price chart, historical price graph, and revision table for Petrol 92, Petrol 95, Auto Diesel, Super Diesel, and Kerosene."
-        },
-        {
-          "title": "Home - fuelprice.lk",
-          "url": "https://fuelprice.lk/",
-          "snippet": "FuelPrice .lk is your go-to source for the latest and historical fuel prices in Sri Lanka . Stay updated on petrol, diesel, and kerosene rates."
-        },
-        {
-          "title": "Fuel Prices in Sri Lanka — Current Petrol & Diesel Prices (Updated ...",
-          "url": "https://fuelpass.lk/fuel-price-sri-lanka/",
-          "snippet": "Current CPC and Lanka IOC fuel prices in Sri Lanka — March 2026. Petrol 92, 95 octane, auto diesel, super diesel, kerosene. Updated within 24h of every price change."
-        }
-      ],
-      "created_at": "2026-06-18T16:51:50.218Z"
+      "sources": [],
+      "created_at": "2026-06-19T16:29:48.564Z"
     }
   ]
 }

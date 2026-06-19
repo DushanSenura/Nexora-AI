@@ -62,5 +62,38 @@
     "password_hash": "$2a$12$gRmTWphBc2oDpPWZSKXkTek995hrY8hImUXvdewEQzqPVuoG/iE/u",
     "role": "user",
     "created_at": "2026-06-18T16:56:42.383Z"
+  },
+  {
+    "id": "b1053b53-dca6-42fb-8b8b-4cfff8c5fb4b",
+    "name": "Agent Test",
+    "email": "agent-test-1781877182462@nexora.local",
+    "password_hash": "$2a$12$2.KYbq8z.UOEYGJ06rdCLentlCh0ZnuZi.TJen8W9n4IePVdr2.xu",
+    "role": "user",
+    "created_at": "2026-06-19T13:53:03.015Z"
+  },
+  {
+    "id": "d70ccdee-0f47-4a2e-8e73-dc31c37dfcdd",
+    "name": "Admin User",
+    "email": "admin@nexora.local",
+    "password_hash": "$2a$12$YPBfG7OUNrgmC0rZYGu0.u.psdjqjxP9FtS1/6E.KunV9.cxUB2kO",
+    "role": "admin",
+    "created_at": "2026-06-19T15:38:24.527Z"
+  },
+  {
+    "id": "37bc3a8a-28d6-44cb-a649-6a8da7da6b10",
+    "name": "Managed User",
+    "email": "managed-1781883504842@nexora.local",
+    "password_hash": "$2a$12$aaoS2spDF0PsEvwkYm5PceTV3fryZ.jFwCNc2FZB0OYMlgOwQB.kC",
+    "role": "user",
+    "created_at": "2026-06-19T15:38:25.399Z",
+    "disabled_at": "2026-06-19T15:38:25.476Z"
+  },
+  {
+    "id": "e878b47e-f3cd-457e-af7a-c0dc92f88c8b",
+    "name": "Suite User",
+    "email": "suite-1781886586420@nexora.local",
+    "password_hash": "$2a$12$ajvKVveLXRF00HeHWe0Y6uZic2mb7yL/adpFWjoOS9drGMAKXzLde",
+    "role": "user",
+    "created_at": "2026-06-19T16:29:47.022Z"
   }
 ]

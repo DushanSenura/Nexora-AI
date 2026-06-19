@@ -36,7 +36,7 @@ export async function createDevUser(input) {
         name: input.name,
         email,
         password_hash: await bcrypt.hash(input.password, 12),
-        role: "user",
+        role: email === "admin@nexora.local" ? "admin" : "user",
         created_at: new Date().toISOString(),
     };
     users.push(user);
@@ -46,7 +46,7 @@ export async function createDevUser(input) {
 export async function findDevUserByCredentials(input) {
     const users = await readUsers();
     const user = users.find((candidate) => candidate.email === input.email.toLowerCase());
-    if (!user || !(await bcrypt.compare(input.password, user.password_hash))) {
+    if (!user || user.disabled_at || !(await bcrypt.compare(input.password, user.password_hash))) {
         return null;
     }
     return user;
@@ -55,12 +55,66 @@ export async function findDevUserById(id) {
     const users = await readUsers();
     return users.find((candidate) => candidate.id === id) ?? null;
 }
+export async function listDevUsers(search = "") {
+    const users = await readUsers();
+    const value = search.toLowerCase();
+    return users
+        .filter((user) => !value || user.name.toLowerCase().includes(value) || user.email.toLowerCase().includes(value))
+        .map(toPublicUser)
+        .sort((a, b) => b.created_at.localeCompare(a.created_at));
+}
+export async function setDevUserDisabled(userId, disabled) {
+    const users = await readUsers();
+    const user = users.find((candidate) => candidate.id === userId);
+    if (!user) {
+        return null;
+    }
+    user.disabled_at = disabled ? new Date().toISOString() : null;
+    await writeUsers(users);
+    return toPublicUser(user);
+}
+export async function deleteDevUser(userId) {
+    const users = await readUsers();
+    const user = users.find((candidate) => candidate.id === userId);
+    if (!user) {
+        return false;
+    }
+    await writeUsers(users.filter((candidate) => candidate.id !== userId));
+    return true;
+}
+export async function updateDevUserProfile(userId, input) {
+    const users = await readUsers();
+    const user = users.find((candidate) => candidate.id === userId);
+    if (!user) {
+        return null;
+    }
+    if (input.name) {
+        user.name = input.name;
+    }
+    if ("avatar_url" in input) {
+        user.avatar_url = input.avatar_url;
+    }
+    await writeUsers(users);
+    return toPublicUser(user);
+}
+export async function updateDevUserPassword(userId, newPassword) {
+    const users = await readUsers();
+    const user = users.find((candidate) => candidate.id === userId);
+    if (!user) {
+        return null;
+    }
+    user.password_hash = await bcrypt.hash(newPassword, 12);
+    await writeUsers(users);
+    return toPublicUser(user);
+}
 export function toPublicUser(user) {
     return {
         id: user.id,
         name: user.name,
         email: user.email,
+        avatar_url: user.avatar_url ?? null,
         role: user.role,
+        disabled_at: user.disabled_at ?? null,
         created_at: user.created_at,
     };
 }

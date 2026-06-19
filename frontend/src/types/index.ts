@@ -4,6 +4,7 @@ export type User = {
   id: string;
   name: string;
   email: string;
+  avatarUrl?: string | null;
   role: Role;
   createdAt: string;
 };
@@ -41,4 +42,3 @@ export type AgentTask = {
   status: "queued" | "running" | "complete" | "failed";
   createdAt: string;
 };
-

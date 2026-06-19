@@ -9,6 +9,8 @@ export type AuthResponse = {
     id: string;
     name: string;
     email: string;
+    avatar_url?: string | null;
+    avatarUrl?: string | null;
     role: User["role"];
     created_at?: string;
     createdAt?: string;
@@ -20,6 +22,7 @@ export function normalizeUser(user: AuthResponse["user"]): User {
     id: user.id,
     name: user.name,
     email: user.email,
+    avatarUrl: user.avatarUrl ?? user.avatar_url ?? null,
     role: user.role,
     createdAt: user.createdAt ?? user.created_at ?? new Date().toISOString(),
   };
@@ -50,8 +53,11 @@ export function storeAuth(response: AuthResponse) {
   return user;
 }
 
+export function storeUser(user: User) {
+  localStorage.setItem(USER_KEY, JSON.stringify(user));
+}
+
 export function clearAuth() {
   localStorage.removeItem(TOKEN_KEY);
   localStorage.removeItem(USER_KEY);
 }
-
