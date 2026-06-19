@@ -8,3 +8,5 @@ qdrant-client==1.12.1
 python-multipart==0.0.20
 pypdf==5.1.0
 python-docx==1.1.2
+# Optional on Python <= 3.13. Python 3.14 may fail building tokenizers.
+# chromadb==0.5.23

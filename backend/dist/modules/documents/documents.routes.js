@@ -8,7 +8,7 @@ import { query } from "../../database/pool.js";
 import { requireAuth } from "../../middleware/auth.js";
 import { HttpError } from "../../utils/httpError.js";
 import { canUseDevAuthFallback } from "../auth/devAuthStore.js";
-import { createDevDocument, deleteDevDocument, listDevDocuments } from "./devDocumentStore.js";
+import { appendDevDocumentQa, createDevDocument, deleteDevDocument, getDevDocument, listDevDocumentMessages, listDevDocuments, updateDevDocument, } from "./devDocumentStore.js";
 export const documentsRouter = Router();
 documentsRouter.use(requireAuth);
 const uploadRoot = join(process.cwd(), "uploads", "documents");
@@ -46,15 +46,24 @@ const upload = multer({
         callback(null, true);
     },
 });
-async function processWithAiService(file) {
+async function processWithAiService(file, documentId) {
     const form = new FormData();
     const blob = new Blob([await readFile(file.path)], {
         type: file.mimetype,
     });
     form.append("file", blob, file.originalname);
+    form.append("document_id", documentId);
     const response = await axios.post(`${env.AI_SERVICE_URL}/ai/documents/process`, form, {
         headers: { "Content-Type": "multipart/form-data" },
         timeout: 60000,
+    });
+    return response.data;
+}
+async function askDocumentWithAiService(documentId, question) {
+    const response = await axios.post(`${env.AI_SERVICE_URL}/ai/documents/ask`, {
+        document_id: documentId,
+        question,
+        model: "llama3.2",
     });
     return response.data;
 }
@@ -79,8 +88,9 @@ documentsRouter.post("/upload", upload.single("file"), async (req, res, next) =>
     }
     const fileUrl = `/uploads/documents/${file.filename}`;
     try {
-        const aiResult = await processWithAiService(file);
-        const result = await query("insert into documents (user_id, file_name, file_type, file_url, status) values ($1, $2, $3, $4, 'ready') returning *", [req.user.id, file.originalname, file.mimetype, fileUrl]);
+        const inserted = await query("insert into documents (user_id, file_name, file_type, file_url, status) values ($1, $2, $3, $4, 'processing') returning *", [req.user.id, file.originalname, file.mimetype, fileUrl]);
+        const aiResult = await processWithAiService(file, inserted.rows[0].id);
+        const result = await query("update documents set status = 'ready' where id = $1 returning *", [inserted.rows[0].id]);
         res.status(201).json({
             ...result.rows[0],
             file_size: file.size,
@@ -91,18 +101,21 @@ documentsRouter.post("/upload", upload.single("file"), async (req, res, next) =>
     catch (error) {
         if (canUseDevAuthFallback(error)) {
             try {
-                const aiResult = await processWithAiService(file);
                 const document = await createDevDocument({
                     user_id: req.user.id,
                     file_name: file.originalname,
                     file_type: file.mimetype,
                     file_url: fileUrl,
-                    status: "ready",
+                    status: "processing",
                     file_size: file.size,
+                });
+                const aiResult = await processWithAiService(file, document.id);
+                const readyDocument = await updateDevDocument(req.user.id, document.id, {
+                    status: "ready",
                     chunk_count: aiResult.chunk_count ?? 0,
                     extracted_chars: aiResult.character_count ?? 0,
                 });
-                res.status(201).json(document);
+                res.status(201).json(readyDocument);
                 return;
             }
             catch (aiError) {
@@ -115,6 +128,83 @@ documentsRouter.post("/upload", upload.single("file"), async (req, res, next) =>
                     file_size: file.size,
                 });
                 res.status(502).json({ message: "Document uploaded, but processing failed", document });
+                return;
+            }
+        }
+        next(error);
+    }
+});
+documentsRouter.get("/:documentId/chat", async (req, res, next) => {
+    try {
+        const document = await query("select id from documents where id = $1 and user_id = $2", [
+            req.params.documentId,
+            req.user.id,
+        ]);
+        if (!document.rows[0]) {
+            res.status(404).json({ message: "Document not found" });
+            return;
+        }
+        const result = await query("select id, document_id, user_id, role, content, chunk_references as references, created_at from document_messages where document_id = $1 and user_id = $2 order by created_at asc", [req.params.documentId, req.user.id]);
+        res.json(result.rows);
+    }
+    catch (error) {
+        if (canUseDevAuthFallback(error)) {
+            const messages = await listDevDocumentMessages(req.user.id, req.params.documentId);
+            if (!messages) {
+                res.status(404).json({ message: "Document not found" });
+                return;
+            }
+            res.json(messages);
+            return;
+        }
+        next(error);
+    }
+});
+documentsRouter.post("/:documentId/chat", async (req, res, next) => {
+    const question = String(req.body?.question ?? "").trim();
+    if (!question) {
+        next(new HttpError(400, "Question is required"));
+        return;
+    }
+    try {
+        const document = await query("select id from documents where id = $1 and user_id = $2 and status = 'ready'", [
+            req.params.documentId,
+            req.user.id,
+        ]);
+        if (!document.rows[0]) {
+            res.status(404).json({ message: "Ready document not found" });
+            return;
+        }
+        const aiResult = await askDocumentWithAiService(req.params.documentId, question);
+        const userMessage = await query("insert into document_messages (document_id, user_id, role, content) values ($1, $2, 'user', $3) returning id, document_id, user_id, role, content, chunk_references as references, created_at", [req.params.documentId, req.user.id, question]);
+        const assistantMessage = await query("insert into document_messages (document_id, user_id, role, content, chunk_references) values ($1, $2, 'assistant', $3, $4::jsonb) returning id, document_id, user_id, role, content, chunk_references as references, created_at", [req.params.documentId, req.user.id, aiResult.answer, JSON.stringify(aiResult.references ?? [])]);
+        res.status(201).json({ userMessage: userMessage.rows[0], assistantMessage: assistantMessage.rows[0] });
+    }
+    catch (error) {
+        if (canUseDevAuthFallback(error)) {
+            const document = await getDevDocument(req.user.id, req.params.documentId);
+            if (!document || document.status !== "ready") {
+                res.status(404).json({ message: "Ready document not found" });
+                return;
+            }
+            try {
+                const aiResult = await askDocumentWithAiService(req.params.documentId, question);
+                const saved = await appendDevDocumentQa({
+                    userId: req.user.id,
+                    documentId: req.params.documentId,
+                    question,
+                    answer: aiResult.answer,
+                    references: aiResult.references ?? [],
+                });
+                res.status(201).json(saved);
+                return;
+            }
+            catch (aiError) {
+                if (axios.isAxiosError(aiError)) {
+                    next(new HttpError(502, "AI document service is unavailable"));
+                    return;
+                }
+                next(aiError);
                 return;
             }
         }

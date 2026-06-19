@@ -53,6 +53,16 @@ create table if not exists documents (
   created_at timestamptz not null default now()
 );
 
+create table if not exists document_messages (
+  id uuid primary key default gen_random_uuid(),
+  document_id uuid not null references documents(id) on delete cascade,
+  user_id uuid not null references users(id) on delete cascade,
+  role message_role not null,
+  content text not null,
+  chunk_references jsonb not null default '[]'::jsonb,
+  created_at timestamptz not null default now()
+);
+
 create table if not exists agent_tasks (
   id uuid primary key default gen_random_uuid(),
   user_id uuid not null references users(id) on delete cascade,
@@ -74,6 +84,7 @@ create table if not exists usage_logs (
 create index if not exists idx_chats_user_id on chats(user_id);
 create index if not exists idx_messages_chat_id on messages(chat_id);
 create index if not exists idx_documents_user_id on documents(user_id);
+create index if not exists idx_document_messages_document_id on document_messages(document_id);
 create index if not exists idx_agent_tasks_user_id on agent_tasks(user_id);
 create index if not exists idx_usage_logs_user_id on usage_logs(user_id);
 

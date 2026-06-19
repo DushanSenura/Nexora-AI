@@ -1,4 +1,5 @@
 import { type ChangeEvent, useRef, useState } from "react";
+import { Link } from "react-router-dom";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { FileText, Trash2, Upload } from "lucide-react";
 import { PageHeader } from "../../components/PageHeader";
@@ -140,7 +141,9 @@ export function DocumentsPage() {
               <div className="flex min-w-0 items-center gap-3">
                 <FileText className="h-4 w-4 shrink-0 text-primary" />
                 <div className="min-w-0">
-                  <div className="truncate font-medium">{document.file_name}</div>
+                  <Link to={`/documents/${document.id}`} className="truncate font-medium text-primary hover:underline">
+                    {document.file_name}
+                  </Link>
                   <div className="text-xs text-muted-foreground">
                     {document.chunk_count ?? 0} chunks · {document.extracted_chars ?? 0} chars
                   </div>
@@ -171,4 +174,3 @@ export function DocumentsPage() {
     </>
   );
 }
-
