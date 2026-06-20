@@ -14,6 +14,8 @@ export type MessageRecord = {
   role: "user" | "assistant" | "system";
   content: string;
   model?: string;
+  content_type?: "text" | "image";
+  image_url?: string | null;
   sources?: Array<{ title: string; url: string; snippet?: string }>;
   created_at: string;
 };

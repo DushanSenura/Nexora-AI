@@ -41,6 +41,8 @@ create table if not exists messages (
   role message_role not null,
   content text not null,
   model text,
+  content_type text not null default 'text',
+  image_url text,
   sources jsonb not null default '[]'::jsonb,
   created_at timestamptz not null default now()
 );

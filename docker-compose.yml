@@ -46,6 +46,7 @@ services:
     env_file: .env
     environment:
       OLLAMA_BASE_URL: http://host.docker.internal:11434
+      IMAGE_GENERATION_BASE_URL: http://host.docker.internal:7860
       QDRANT_URL: http://qdrant:6333
     ports:
       - "8000:8000"
@@ -65,4 +66,3 @@ services:
 volumes:
   postgres_data:
   qdrant_data:
-

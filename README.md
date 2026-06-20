@@ -50,6 +50,20 @@ Or run the whole stack with Docker:
 docker compose up --build
 ```
 
+## Local Image Generation
+
+Image requests such as `Create a logo` are routed to a separate Stable Diffusion WebUI (Automatic1111) API. Start WebUI with API access enabled:
+
+```bash
+webui-user.bat --api
+```
+
+The default endpoint is `http://localhost:7860`. Override `IMAGE_GENERATION_BASE_URL` and the image dimensions in `.env` when needed. For an existing PostgreSQL database, apply the image message migration before sending image prompts:
+
+```bash
+psql "$DATABASE_URL" -f database/migrations/006_add_message_image_fields.sql
+```
+
 ## Default Ports
 
 - Frontend: http://localhost:5173
@@ -57,4 +71,3 @@ docker compose up --build
 - AI service: http://localhost:8000
 - PostgreSQL: localhost:5432
 - Qdrant: http://localhost:6333
-

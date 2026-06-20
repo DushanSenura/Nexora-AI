@@ -16,6 +16,8 @@ export type DevMessage = {
   role: "user" | "assistant" | "system";
   content: string;
   model?: string;
+  content_type?: "text" | "image";
+  image_url?: string | null;
   sources?: Array<{ title: string; url: string; snippet?: string }>;
   created_at: string;
 };
@@ -140,6 +142,8 @@ export async function appendDevMessagePair(input: {
   assistantContent: string;
   model: string;
   sources?: Array<{ title: string; url: string; snippet?: string }>;
+  contentType?: "text" | "image";
+  imageUrl?: string | null;
 }) {
   const store = await readStore();
   const chat = store.chats.find((candidate) => candidate.user_id === input.userId && candidate.id === input.chatId);
@@ -162,6 +166,8 @@ export async function appendDevMessagePair(input: {
     role: "assistant",
     content: input.assistantContent,
     model: input.model,
+    content_type: input.contentType ?? "text",
+    image_url: input.imageUrl ?? null,
     sources: input.sources ?? [],
     created_at: new Date(Date.now() + 1).toISOString(),
   };

@@ -114,6 +114,8 @@ export async function appendDevMessagePair(input) {
         role: "assistant",
         content: input.assistantContent,
         model: input.model,
+        content_type: input.contentType ?? "text",
+        image_url: input.imageUrl ?? null,
         sources: input.sources ?? [],
         created_at: new Date(Date.now() + 1).toISOString(),
     };

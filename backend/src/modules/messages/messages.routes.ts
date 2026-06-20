@@ -81,10 +81,12 @@ messagesRouter.post("/", async (req, res, next) => {
         });
     const assistantContent = input.searchMode ? aiResponse.data.answer : aiResponse.data.response;
     const sources = input.searchMode ? aiResponse.data.sources ?? [] : [];
+    const contentType = input.searchMode ? "text" : aiResponse.data.content_type ?? "text";
+    const imageUrl = input.searchMode ? null : aiResponse.data.image_url ?? null;
 
     const assistantSaved = await query(
-      "insert into messages (chat_id, role, content, model, sources) values ($1, 'assistant', $2, $3, $4::jsonb) returning *",
-      [input.chatId, assistantContent, input.model, JSON.stringify(sources)],
+      "insert into messages (chat_id, role, content, model, sources, content_type, image_url) values ($1, 'assistant', $2, $3, $4::jsonb, $5, $6) returning *",
+      [input.chatId, assistantContent, aiResponse.data.model ?? input.model, JSON.stringify(sources), contentType, imageUrl],
     );
     await query("update chats set title = case when title = 'New chat' then $1 else title end, updated_at = now() where id = $2", [
       generateChatTitle(input.content),
@@ -113,13 +115,17 @@ messagesRouter.post("/", async (req, res, next) => {
             });
         const assistantContent = input.searchMode ? aiResponse.data.answer : aiResponse.data.response;
         const sources = input.searchMode ? aiResponse.data.sources ?? [] : [];
+        const contentType = input.searchMode ? "text" : aiResponse.data.content_type ?? "text";
+        const imageUrl = input.searchMode ? null : aiResponse.data.image_url ?? null;
         const saved = await appendDevMessagePair({
           userId: req.user!.id,
           chatId: input.chatId,
           userContent: input.content,
           assistantContent,
-          model: input.model,
+          model: aiResponse.data.model ?? input.model,
           sources,
+          contentType,
+          imageUrl,
         });
 
         if (!saved) {

@@ -45,7 +45,18 @@ function MessageBubble({ message }: { message: MessageRecord }) {
           isUser ? "bg-primary text-primary-foreground" : "bg-muted text-foreground",
         )}
       >
-        {message.content}
+        {message.content_type === "image" && message.image_url ? (
+          <figure className="space-y-2">
+            <img
+              src={message.image_url}
+              alt="AI-generated image"
+              className="max-h-[32rem] w-auto rounded-md object-contain"
+            />
+            <figcaption className="text-xs text-muted-foreground">{message.content}</figcaption>
+          </figure>
+        ) : (
+          message.content
+        )}
       </div>
       {!isUser && sources.length ? (
         <div className="max-w-[min(42rem,85%)] space-y-2 rounded-lg border bg-card p-3">
